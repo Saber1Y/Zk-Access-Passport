@@ -42,8 +42,8 @@ export default function WalletStatus() {
           {connecting ? "Connecting..." : "Connect Wallet"}
         </button>
       )}
-      {error && (
-        <span style={{ color: "#dc2626", fontSize: "0.72rem" }}>{error}</span>
+      {error && connected === false && (
+        <span style={{ color: "#dc2626", fontSize: "0.72rem", maxWidth: 180 }}>{error}</span>
       )}
     </div>
   )

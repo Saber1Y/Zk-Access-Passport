@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
-import { isConnected, isAllowed, setAllowed, getAddress, getNetworkDetails } from "@stellar/freighter-api"
+import { isConnected, getAddress, requestAccess, getNetworkDetails } from "@stellar/freighter-api"
 
 export interface FreighterState {
   address: string
@@ -15,35 +15,26 @@ export interface FreighterState {
   error: string | null
 }
 
-let cached: { address: string; displayName: string; network: string; networkPassphrase: string; sorobanRpcUrl: string } | null = null
-
 function displayName(addr: string) {
   return `${addr.slice(0, 4)}...${addr.slice(-4)}`
 }
 
 export function useFreighter(): FreighterState {
-  const [address, setAddress] = useState(cached?.address ?? "")
-  const [network, setNetwork] = useState(cached?.network ?? "")
-  const [networkPassphrase, setNetworkPassphrase] = useState(cached?.networkPassphrase ?? "")
-  const [sorobanRpcUrl, setSorobanRpcUrl] = useState(cached?.sorobanRpcUrl ?? "")
-  const [connected, setConnected] = useState(!!cached)
+  const [address, setAddress] = useState("")
+  const [network, setNetwork] = useState("")
+  const [networkPassphrase, setNetworkPassphrase] = useState("")
+  const [sorobanRpcUrl, setSorobanRpcUrl] = useState("")
+  const [connected, setConnected] = useState(false)
   const [connecting, setConnecting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (): Promise<boolean> => {
     const avail = await isConnected()
-    if (!avail.isConnected) {
-      setError("Freighter not detected")
-      return
-    }
-    const allowed = await isAllowed()
-    if (!allowed.isAllowed) return
+    if (!avail.isConnected) return false
 
     const addrResult = await getAddress()
-    if (addrResult.error) {
-      setError(addrResult.error)
-      return
-    }
+    if (addrResult.error) return false
+
     setAddress(addrResult.address)
     setConnected(true)
     setError(null)
@@ -52,14 +43,7 @@ export function useFreighter(): FreighterState {
     setNetwork(net.network)
     setNetworkPassphrase(net.networkPassphrase)
     setSorobanRpcUrl(net.sorobanRpcUrl ?? "")
-
-    cached = {
-      address: addrResult.address,
-      displayName: displayName(addrResult.address),
-      network: net.network,
-      networkPassphrase: net.networkPassphrase,
-      sorobanRpcUrl: net.sorobanRpcUrl ?? "",
-    }
+    return true
   }, [])
 
   useEffect(() => { load() }, [load])
@@ -68,17 +52,23 @@ export function useFreighter(): FreighterState {
     setConnecting(true)
     setError(null)
     try {
-      const result = await setAllowed()
-      if (!result.isAllowed) {
-        setError("Connection rejected")
-        return
+      const result = await requestAccess()
+      if (result.error) {
+        setError(result.error)
+      } else {
+        setAddress(result.address)
+        setConnected(true)
+
+        const net = await getNetworkDetails()
+        setNetwork(net.network)
+        setNetworkPassphrase(net.networkPassphrase)
+        setSorobanRpcUrl(net.sorobanRpcUrl ?? "")
       }
-      await load()
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Connection failed")
+      setError(e instanceof Error ? e.message : "Connection cancelled")
     }
     setConnecting(false)
-  }, [load])
+  }, [])
 
   return {
     address,
