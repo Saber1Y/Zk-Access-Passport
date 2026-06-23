@@ -1,65 +1,118 @@
-import Image from "next/image";
+"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+
+const STORAGE_KEY = "zk_access_credential"
+
+const defaultCredential = {
+  age: 25, kyc_level: 3, already_sent: 500, monthly_limit: 2000,
+  investor_type: 2, max_investment: 100000, restricted: 0,
+  credential_secret: String(Math.floor(Math.random() * 100000)),
+}
+
+interface Credential {
+  age: number; kyc_level: number; already_sent: number; monthly_limit: number
+  investor_type: number; max_investment: number; restricted: number
+  credential_secret: string
+}
 
 export default function Home() {
+  const router = useRouter()
+  const saved = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null
+  const [form, setForm] = useState<Credential>(saved ? JSON.parse(saved) : defaultCredential)
+  const [savedMsg, setSavedMsg] = useState("")
+
+  function set<K extends keyof Credential>(k: K, v: Credential[K]) {
+    setForm((f) => ({ ...f, [k]: v }))
+  }
+
+  function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(form))
+    setSavedMsg("Credential saved!")
+    setTimeout(() => setSavedMsg(""), 3000)
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div>
+      <div className="card">
+        <h2 style={{ marginBottom: "0.5rem" }}>Issue Credential</h2>
+        <p style={{ color: "#666", marginBottom: "1rem", fontSize: "0.9rem" }}>
+          Enter your private attributes. These are never shared — they stay in your
+          browser and are used to generate zero-knowledge proofs locally.
+        </p>
+
+        <div className="form-row">
+          <div>
+            <label>Age</label>
+            <input type="number" value={form.age} onChange={(e) => set("age", +e.target.value)} />
+          </div>
+          <div>
+            <label>KYC Level</label>
+            <select value={form.kyc_level} onChange={(e) => set("kyc_level", +e.target.value)}>
+              <option value={0}>0 — None</option>
+              <option value={1}>1 — Basic</option>
+              <option value={2}>2 — Enhanced</option>
+              <option value={3}>3 — Institutional</option>
+            </select>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="form-row">
+          <div>
+            <label>Already Sent (USD)</label>
+            <input type="number" value={form.already_sent} onChange={(e) => set("already_sent", +e.target.value)} />
+          </div>
+          <div>
+            <label>Monthly Limit (USD)</label>
+            <input type="number" value={form.monthly_limit} onChange={(e) => set("monthly_limit", +e.target.value)} />
+          </div>
         </div>
-      </main>
+
+        <div className="form-row">
+          <div>
+            <label>Investor Type</label>
+            <select value={form.investor_type} onChange={(e) => set("investor_type", +e.target.value)}>
+              <option value={0}>0 — Retail</option>
+              <option value={1}>1 — Accredited</option>
+              <option value={2}>2 — Institutional</option>
+            </select>
+          </div>
+          <div>
+            <label>Max Investment (USD)</label>
+            <input type="number" value={form.max_investment} onChange={(e) => set("max_investment", +e.target.value)} />
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div>
+            <label>Restricted Jurisdiction</label>
+            <select value={form.restricted} onChange={(e) => set("restricted", +e.target.value)}>
+              <option value={0}>No</option>
+              <option value={1}>Yes</option>
+            </select>
+          </div>
+          <div>
+            <label>Credential Secret</label>
+            <input type="text" value={form.credential_secret} onChange={(e) => set("credential_secret", e.target.value)} />
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
+          <button onClick={save}>Save Credential</button>
+          {savedMsg && <span className="success" style={{ alignSelf: "center" }}>{savedMsg}</span>}
+        </div>
+      </div>
+
+      <div className="card" style={{ textAlign: "center" }}>
+        <p style={{ marginBottom: "0.75rem", color: "#666" }}>
+          Try one of the compliance demos:
+        </p>
+        <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+          <button onClick={() => router.push("/remit")}>Remit Demo</button>
+          <button onClick={() => router.push("/rwa")}>RWA Demo</button>
+        </div>
+      </div>
     </div>
-  );
+  )
 }
