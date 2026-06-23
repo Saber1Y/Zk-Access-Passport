@@ -1,0 +1,10 @@
+{
+  "age": 25,
+  "kyc_level": 3,
+  "already_sent": 500,
+  "monthly_limit": 2000,
+  "credential_secret": "12345",
+  "required_age": 18,
+  "required_kyc": 2,
+  "amount": 1000
+}

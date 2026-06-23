@@ -1,0 +1,12 @@
+{
+  "age": 35,
+  "kyc_level": 3,
+  "investor_type": 2,
+  "max_investment": 100000,
+  "restricted": 0,
+  "credential_secret": "67890",
+  "required_age": 18,
+  "required_kyc": 2,
+  "required_investor_type": 1,
+  "investment_amount": 50000
+}
