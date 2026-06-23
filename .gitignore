@@ -1,4 +1,6 @@
 node_modules/
+backend/node_modules/
+frontend/node_modules/
 circuits/*.r1cs
 circuits/*.sym
 circuits/*_js/
@@ -6,3 +8,4 @@ circuits/*.zkey
 circuits/verification_key.json
 circuits/powersOfTau28_hez_final_*.ptau
 target/
+frontend/dist/
