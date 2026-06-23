@@ -1,26 +1,21 @@
 import type { Metadata } from "next"
-import Link from "next/link"
+import { Sora } from "next/font/google"
 import "./globals.css"
+
+const sora = Sora({
+  subsets: ["latin"],
+  variable: "--font-sora",
+})
 
 export const metadata: Metadata = {
   title: "ZK Access Passport",
-  description: "Zero-knowledge compliance passport for remittance and RWA investment",
+  description: "Private compliance proofs for Stellar payments and tokenized assets",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="h-full">
-      <body className="min-h-full flex flex-col">
-        <nav className="nav">
-          <h1 className="nav-title">ZK Access Passport</h1>
-          <div className="nav-links">
-            <Link href="/">Home</Link>
-            <Link href="/remit">Remit Demo</Link>
-            <Link href="/rwa">RWA Demo</Link>
-          </div>
-        </nav>
-        <main className="main">{children}</main>
-      </body>
+    <html lang="en" className={`${sora.variable} h-full`}>
+      <body className="min-h-full">{children}</body>
     </html>
   )
 }
