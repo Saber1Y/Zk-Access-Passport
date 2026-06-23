@@ -4,17 +4,32 @@ include "comparators.circom";
 include "poseidon.circom";
 
 template RemitPass() {
-  // Inputs — all are private by default in Circom.
-  // We'll mark which ones are public when generating the proof with snarkjs.
+  // ── PRIVATE INPUTS (witness, never revealed) ──
   signal input age;
   signal input kyc_level;
   signal input already_sent;
   signal input monthly_limit;
   signal input credential_secret;
+
+  // ── PUBLIC INPUTS (supplied by prover, checked by verifier) ──
+  // In Circom 2.x, inputs are private by default.
+  // To make them public we route through signal output with equality.
   signal input required_age;
   signal input required_kyc;
   signal input amount;
   signal input nullifier_hash;
+
+  // ── PUBLIC OUTPUTS (visible on-chain in the proof) ──
+  signal output out_required_age;
+  signal output out_required_kyc;
+  signal output out_amount;
+  signal output out_nullifier_hash;
+
+  // Bind public outputs to inputs (makes these values public in the proof)
+  out_required_age <== required_age;
+  out_required_kyc <== required_kyc;
+  out_amount <== amount;
+  out_nullifier_hash <== nullifier_hash;
 
   // ── 1. Prove age >= required_age (e.g., 18) ──
   component age_ok = GreaterEqThan(32);

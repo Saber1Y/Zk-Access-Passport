@@ -16,6 +16,19 @@ template RWAPass() {
   signal input investment_amount;
   signal input nullifier_hash;
 
+  // ── PUBLIC OUTPUTS (visible on-chain) ──
+  signal output out_required_age;
+  signal output out_required_kyc;
+  signal output out_required_investor_type;
+  signal output out_investment_amount;
+  signal output out_nullifier_hash;
+
+  out_required_age <== required_age;
+  out_required_kyc <== required_kyc;
+  out_required_investor_type <== required_investor_type;
+  out_investment_amount <== investment_amount;
+  out_nullifier_hash <== nullifier_hash;
+
   // ── 1. Prove age >= required_age ──
   component age_ok = GreaterEqThan(32);
   age_ok.in[0] <== age;
