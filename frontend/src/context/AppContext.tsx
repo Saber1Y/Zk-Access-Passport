@@ -76,11 +76,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [lastTxHash, setLastTxHash] = useState("")
   const [lastError, setLastError] = useState("")
   const [useCase, setUseCase] = useState(0)
-  const [initialized, setInitialized] = useState(false)
-
   useEffect(() => {
     if (typeof window === "undefined") return
-    setInitialized(true)
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
       try { setCredential(JSON.parse(saved)); return } catch {}
@@ -104,8 +101,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLastTxHash("")
     setLastError("")
   }, [])
-
-  if (!initialized) return <>{children}</>
 
   return (
     <AppContext.Provider value={{

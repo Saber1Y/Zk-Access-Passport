@@ -4,10 +4,7 @@ import { useApp } from "@/context/AppContext"
 import { bytesToHex } from "@/lib/prove"
 
 export default function ProofExplorer() {
-  const { proof, lastTxHash, lastError, status, credential } = useApp()
-
-  const hiddenFields = ["Age", "Country", "KYC Level", "Monthly Limit", "Already Sent", "Investor Type"]
-  const publicFields = ["Amount", "Nullifier Hash", "Credential Root", "Policy ID"]
+  const { proof, lastTxHash, lastError, credential } = useApp()
 
   const remitEvents = ["ProofSubmitted", "ProofVerified", "NullifierUsed", "PaymentReleased"]
   const rwaEvents = ["ProofSubmitted", "ProofVerified", "NullifierUsed", "RWATokenMinted"]
@@ -43,7 +40,7 @@ export default function ProofExplorer() {
               </div>
               <div style={{ flex: 1, background: "#f8fafc", borderRadius: 6, padding: "0.75rem" }}>
                 <div style={{ fontSize: "0.72rem", color: "#888", textTransform: "uppercase", letterSpacing: "0.05em" }}>Policy</div>
-                <div style={{ fontWeight: 600, fontSize: "0.9rem", marginTop: "0.2rem", fontFamily: "monospace", fontSize: "0.78rem" }}>
+                <div style={{ fontWeight: 600, marginTop: "0.2rem", fontFamily: "monospace", fontSize: "0.78rem" }}>
                   {proof.useCase === 0 ? "REMIT_KENYA_GHANA_V1" : "RWA_SOLAR_BOND_V1"}
                 </div>
               </div>
