@@ -51,14 +51,14 @@ export function useFreighter(): FreighterState {
     const net = await getNetworkDetails()
     setNetwork(net.network)
     setNetworkPassphrase(net.networkPassphrase)
-    setSorobanRpcUrl(net.sorobanRpcUrl)
+    setSorobanRpcUrl(net.sorobanRpcUrl ?? "")
 
     cached = {
       address: addrResult.address,
       displayName: displayName(addrResult.address),
       network: net.network,
       networkPassphrase: net.networkPassphrase,
-      sorobanRpcUrl: net.sorobanRpcUrl,
+      sorobanRpcUrl: net.sorobanRpcUrl ?? "",
     }
   }, [])
 
