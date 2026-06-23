@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useApp } from "@/context/AppContext"
+import { HiOutlineLockClosed, HiOutlineGlobeAlt, HiOutlineArrowRight } from "react-icons/hi2"
 import Stepper from "./Stepper"
 
 export default function IssuePassport() {
@@ -143,7 +144,7 @@ export default function IssuePassport() {
 
               <div className="card" style={{ border: "1px solid #f59e0b", borderLeft: "4px solid #f59e0b" }}>
                 <h4 style={{ fontSize: "0.85rem", marginBottom: "0.75rem", color: "#d97706" }}>
-                  🔒 Private Data — never sent to chain
+                  <HiOutlineLockClosed style={{ verticalAlign: "middle", marginRight: 4 }} /> Private Data — never sent to chain
                 </h4>
                 <table style={{ width: "100%", fontSize: "0.82rem" }}>
                   <tbody>
@@ -168,7 +169,7 @@ export default function IssuePassport() {
 
               <div className="card" style={{ border: "1px solid #6366f1", borderLeft: "4px solid #6366f1" }}>
                 <h4 style={{ fontSize: "0.85rem", marginBottom: "0.75rem", color: "#6366f1" }}>
-                  📡 Public Data — visible on Stellar
+                  <HiOutlineGlobeAlt style={{ verticalAlign: "middle", marginRight: 4 }} /> Public Data — visible on Stellar
                 </h4>
                 <table style={{ width: "100%", fontSize: "0.82rem" }}>
                   <tbody>
@@ -190,8 +191,8 @@ export default function IssuePassport() {
               </div>
 
               <div style={{ display: "flex", gap: "0.75rem" }}>
-                <button onClick={() => setTab("remittance")} style={{ flex: 1 }}>Send Remittance →</button>
-                <button onClick={() => setTab("rwa")} style={{ flex: 1 }}>Invest in RWA →</button>
+                <button onClick={() => setTab("remittance")} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>Send Remittance <HiOutlineArrowRight /></button>
+                <button onClick={() => setTab("rwa")} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>Invest in RWA <HiOutlineArrowRight /></button>
               </div>
             </>
           )}

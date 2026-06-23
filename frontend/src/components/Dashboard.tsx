@@ -1,14 +1,15 @@
 "use client"
 
 import { useApp } from "@/context/AppContext"
+import { HiOutlineLockClosed, HiOutlineShieldCheck, HiOutlineBolt } from "react-icons/hi2"
 
 export default function Dashboard() {
   const { setTab } = useApp()
 
   const features = [
-    { title: "Private Data", desc: "Age, country, KYC level, and limits stay hidden — never sent to the blockchain.", icon: "🔒" },
-    { title: "ZK Proof", desc: "User proves eligibility without revealing identity using Groth16 zero-knowledge proofs.", icon: "🧩" },
-    { title: "Stellar Verification", desc: "Soroban smart contract verifies the proof and executes the approved action.", icon: "⚡" },
+    { title: "Private Data", desc: "Age, country, KYC level, and limits stay hidden — never sent to the blockchain.", icon: HiOutlineLockClosed },
+    { title: "ZK Proof", desc: "User proves eligibility without revealing identity using Groth16 zero-knowledge proofs.", icon: HiOutlineShieldCheck },
+    { title: "Stellar Verification", desc: "Soroban smart contract verifies the proof and executes the approved action.", icon: HiOutlineBolt },
   ]
 
   return (
@@ -64,13 +65,18 @@ export default function Dashboard() {
       </div>
 
       <div style={{ display: "flex", gap: "1rem" }}>
-        {features.map((f) => (
-          <div key={f.title} className="card" style={{ flex: 1, marginBottom: 0 }}>
-            <div style={{ fontSize: "1.5rem", marginBottom: "0.4rem" }}>{f.icon}</div>
-            <h4 style={{ fontSize: "0.85rem", marginBottom: "0.3rem" }}>{f.title}</h4>
-            <p style={{ fontSize: "0.78rem", color: "#666", lineHeight: 1.4 }}>{f.desc}</p>
-          </div>
-        ))}
+        {features.map((f) => {
+          const Icon = f.icon
+          return (
+            <div key={f.title} className="card" style={{ flex: 1, marginBottom: 0 }}>
+              <div style={{ fontSize: "1.5rem", marginBottom: "0.4rem", color: "#6366f1" }}>
+                <Icon />
+              </div>
+              <h4 style={{ fontSize: "0.85rem", marginBottom: "0.3rem" }}>{f.title}</h4>
+              <p style={{ fontSize: "0.78rem", color: "#666", lineHeight: 1.4 }}>{f.desc}</p>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

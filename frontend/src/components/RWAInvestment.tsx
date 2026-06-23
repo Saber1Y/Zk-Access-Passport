@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useApp } from "@/context/AppContext"
 import { generateProof, bytesToHex } from "@/lib/prove"
+import { HiOutlineSun, HiOutlineArrowLeft } from "react-icons/hi2"
 import Stepper from "./Stepper"
 
 export default function RWAInvestment() {
@@ -96,7 +97,7 @@ export default function RWAInvestment() {
                 <h4 style={{ fontSize: "0.95rem", fontWeight: 600 }}>{assetData.name}</h4>
                 <p style={{ fontSize: "0.78rem", color: "#666", marginTop: "0.25rem", maxWidth: 300 }}>{assetData.description}</p>
               </div>
-              <span style={{ fontSize: "1.5rem" }}>☀️</span>
+              <span style={{ fontSize: "1.5rem", color: "#f59e0b" }}><HiOutlineSun /></span>
             </div>
             <div style={{ display: "flex", gap: "1.5rem", fontSize: "0.8rem" }}>
               <div><span style={{ color: "#888" }}>Price:</span> <strong>{assetData.price}</strong></div>
@@ -119,8 +120,9 @@ export default function RWAInvestment() {
               style={{
                 background: "transparent", color: "#6366f1", border: "none",
                 fontSize: "0.82rem", cursor: "pointer", padding: 0, marginBottom: "1rem",
+                display: "flex", alignItems: "center", gap: 4,
               }}
-            >← Back to assets</button>
+            ><HiOutlineArrowLeft /> Back to assets</button>
 
             <div className="card">
               <h3 style={{ fontSize: "0.95rem", marginBottom: "1rem" }}>Investment Panel</h3>

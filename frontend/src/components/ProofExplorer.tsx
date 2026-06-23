@@ -2,6 +2,7 @@
 
 import { useApp } from "@/context/AppContext"
 import { bytesToHex } from "@/lib/prove"
+import { HiOutlineGlobeAlt, HiOutlineLockClosed } from "react-icons/hi2"
 
 export default function ProofExplorer() {
   const { proof, lastTxHash, lastError, credential } = useApp()
@@ -50,7 +51,7 @@ export default function ProofExplorer() {
               <div style={{ flex: 1 }}>
                 <div className="card" style={{ border: "1px solid #6366f1", borderLeft: "4px solid #6366f1", marginBottom: 0 }}>
                   <h4 style={{ fontSize: "0.82rem", color: "#6366f1", marginBottom: "0.5rem" }}>
-                    📡 Public Inputs — sent to Stellar
+                    <HiOutlineGlobeAlt style={{ verticalAlign: "middle", marginRight: 4 }} /> Public Inputs — sent to Stellar
                   </h4>
                   <table style={{ width: "100%", fontSize: "0.78rem" }}>
                     <tbody>
@@ -73,7 +74,7 @@ export default function ProofExplorer() {
               <div style={{ flex: 1 }}>
                 <div className="card" style={{ border: "1px solid #f59e0b", borderLeft: "4px solid #f59e0b", marginBottom: 0 }}>
                   <h4 style={{ fontSize: "0.82rem", color: "#d97706", marginBottom: "0.5rem" }}>
-                    🔒 Hidden Inputs — never revealed
+                    <HiOutlineLockClosed style={{ verticalAlign: "middle", marginRight: 4 }} /> Hidden Inputs — never revealed
                   </h4>
                   <table style={{ width: "100%", fontSize: "0.78rem" }}>
                     <tbody>
