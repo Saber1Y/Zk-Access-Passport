@@ -31,6 +31,7 @@ const PROOF_KEY = "zk_access_proof"
 const TX_KEY = "zk_access_tx_hash"
 const ERROR_KEY = "zk_access_error"
 const UC_KEY = "zk_access_use_case"
+const TS_KEY = "zk_access_submitted_at"
 
 const defaults: Credential = {
   name: "Alice",
@@ -66,6 +67,8 @@ interface AppState {
   setLastError: (e: string) => void
   useCase: number
   setUseCase: (u: number) => void
+  submittedAt: number
+  setSubmittedAt: (t: number) => void
   loadPreset: (name: string) => void
   saveCredential: () => void
   reset: () => void
@@ -81,6 +84,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [lastTxHash, setLastTxHash] = useState("")
   const [lastError, setLastError] = useState("")
   const [useCase, setUseCase] = useState(0)
+  const [submittedAt, setSubmittedAt] = useState(0)
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -106,6 +110,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const u = localStorage.getItem(UC_KEY)
     if (u) setUseCase(Number(u))
+
+    const ts = localStorage.getItem(TS_KEY)
+    if (ts) setSubmittedAt(Number(ts))
   }, [])
 
   useEffect(() => {
@@ -115,7 +122,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(TX_KEY, lastTxHash)
     localStorage.setItem(ERROR_KEY, lastError)
     localStorage.setItem(UC_KEY, String(useCase))
-  }, [status, proof, lastTxHash, lastError, useCase])
+    localStorage.setItem(TS_KEY, String(submittedAt))
+  }, [status, proof, lastTxHash, lastError, useCase, submittedAt])
 
   const loadPreset = useCallback((name: string) => {
     const p = PRESETS[name]
@@ -132,13 +140,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProof(null)
     setLastTxHash("")
     setLastError("")
+    setSubmittedAt(0)
   }, [])
 
   return (
     <AppContext.Provider value={{
       tab, setTab, credential, setCredential, status, setStatus,
       proof, setProof, lastTxHash, setLastTxHash, lastError, setLastError,
-      useCase, setUseCase, loadPreset, saveCredential, reset,
+      useCase, setUseCase, submittedAt, setSubmittedAt, loadPreset, saveCredential, reset,
     }}>
       {children}
     </AppContext.Provider>
