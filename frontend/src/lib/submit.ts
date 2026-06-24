@@ -60,7 +60,20 @@ export async function submitProof(params: SubmitParams): Promise<SubmitResult> {
   const sim = await server.simulateTransaction(tx)
 
   if (rpc.Api.isSimulationError(sim)) {
-    throw new Error(`Contract error: ${sim.error}`)
+    const errMsg = String(sim.error ?? '')
+    if (errMsg.includes('nullifier already spent')) {
+      throw new Error(
+        'Rejected: this passport was already used (nullifier replay).\n' +
+        'Create a new passport in the Issue Passport tab, then try again.'
+      )
+    }
+    if (errMsg.includes('proof verification failed')) {
+      throw new Error(
+        'Rejected: the proof is invalid for this contract\'s policy.\n' +
+        'Make sure you generated the proof for the correct use case.'
+      )
+    }
+    throw new Error(`Contract error: ${errMsg}`)
   }
 
   const preparedBuilder = rpc.assembleTransaction(tx, sim)

@@ -15,7 +15,6 @@ export default function IssuePassport() {
     setCredential,
     status,
     saveCredential,
-    loadPreset,
     setTab,
   } = useApp();
   const [saved, setSaved] = useState(status === "credential_created");
@@ -184,43 +183,6 @@ export default function IssuePassport() {
               >
                 Generate Private Passport
               </button>
-            </div>
-          </div>
-
-          <div className="card">
-            <h3 style={{ fontSize: "0.95rem", marginBottom: "0.75rem" }}>
-              Quick Demo Presets
-            </h3>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-              {[
-                { key: "eligible_alice", label: "Load Eligible Alice" },
-                { key: "underage", label: "Load Underage User" },
-                {
-                  key: "restricted_investor",
-                  label: "Load Restricted Investor",
-                },
-                { key: "over_limit", label: "Load Over-Limit User" },
-              ].map((p) => (
-                <button
-                  key={p.key}
-                  onClick={() => {
-                    loadPreset(p.key);
-                    setSaved(false);
-                  }}
-                  style={{
-                    padding: "0.4rem 0.75rem",
-                    fontSize: "0.75rem",
-                    fontWeight: 500,
-                    background: "#f1f5f9",
-                    color: "#334155",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: 6,
-                    cursor: "pointer",
-                  }}
-                >
-                  {p.label}
-                </button>
-              ))}
             </div>
           </div>
         </div>

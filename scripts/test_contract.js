@@ -4,14 +4,13 @@
 import { spawnSync } from 'child_process'
 
 const BACKEND = 'http://localhost:3001/api/prove'
-const CONTRACT = 'CCNEQQDFCCPBGESC7ORKUANKIFBEPGMU62VW3NOMEOTXID7KIRCGVGKY'
+const CONTRACT = 'CBDVEJZHVL63X4IY36NUURN6NBNVUYOLR6CR6HLOYWD5QJBGWIBMPNCM'
 
 function arrToHex(arr) {
   return Buffer.from(arr).toString('hex')
 }
 
 async function main() {
-  // 1. Generate proof
   const res = await fetch(BACKEND, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -32,7 +31,6 @@ async function main() {
   const proof = await res.json()
   console.log('Proof generated successfully')
 
-  // 2. Build CLI args
   const args = [
     'contract', 'invoke',
     '--id', CONTRACT,
@@ -52,11 +50,9 @@ async function main() {
   console.log('Invoking contract...')
   console.log('Args:', args.slice(0, 8).join(' ') + ' ...')
 
-  // 3. Call the contract
   const result = spawnSync('stellar', args, {
     encoding: 'utf8',
     timeout: 60000,
-    cwd: process.cwd(),
   })
 
   if (result.stdout) console.log('stdout:', result.stdout)

@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, BytesN, Env, Vec, vec};
+use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, BytesN, Env, Vec, vec};
 
 use soroban_sdk::crypto::bn254::{Bn254G1Affine, Bn254G2Affine, Fr};
 
@@ -24,21 +24,30 @@ impl ZkAccessGate {
         public_inputs: Vec<BytesN<32>>,
     ) -> Vec<BytesN<32>> {
         let n = public_inputs.len();
-        assert!(n > 0, "at least one public input required (nullifier_hash)");
+        if n == 0 {
+            env.events().publish((symbol_short!("error"),), "no public inputs");
+            panic!("at least one public input required (nullifier_hash)");
+        }
 
         let nullifier = public_inputs.get(n - 1).unwrap();
-        let key = DataKey::Nullifier(nullifier);
-        assert!(
-            !env.storage().instance().has(&key),
-            "replay: nullifier already spent"
-        );
+        let key = DataKey::Nullifier(nullifier.clone());
+        if env.storage().instance().has(&key) {
+            env.events().publish((symbol_short!("error"),), "replay: nullifier already spent");
+            panic!("replay: nullifier already spent");
+        }
 
         let valid = match use_case {
             0 => Self::verify_remit_proof(&env, pi_a, pi_b, pi_c, &public_inputs),
             1 => Self::verify_rwa_proof(&env, pi_a, pi_b, pi_c, &public_inputs),
-            _ => panic!("invalid use_case: 0 = remit, 1 = rwa"),
+            _ => {
+                env.events().publish((symbol_short!("error"),), "invalid use_case");
+                panic!("invalid use_case: 0 = remit, 1 = rwa");
+            }
         };
-        assert!(valid, "proof verification failed");
+        if !valid {
+            env.events().publish((symbol_short!("error"),), "proof verification failed");
+            panic!("proof verification failed");
+        }
 
         env.storage().instance().set(&key, &true);
 
