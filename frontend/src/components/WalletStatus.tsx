@@ -5,12 +5,12 @@ import { useIsMounted } from "@/hooks/useIsMounted"
 
 export default function WalletStatus() {
   const mounted = useIsMounted()
-  const { address, displayName, network, connected, connecting, connect, error } = useFreighter()
+  const { address, displayName, network, connected, connecting, connect, disconnect, error } = useFreighter()
 
   if (!mounted) return null
 
   return (
-    <div style={{ display: "flex", gap: "1.5rem", alignItems: "center", fontSize: "0.8rem" }}>
+    <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", fontSize: "0.8rem" }}>
       {connected ? (
         <>
           <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
@@ -28,6 +28,16 @@ export default function WalletStatus() {
             }} />
             <span>{network || "Unknown"}</span>
           </div>
+          <button
+            onClick={disconnect}
+            style={{
+              background: "transparent", color: "#dc2626", border: "1px solid #dc2626",
+              borderRadius: 6, padding: "0.25rem 0.6rem", fontSize: "0.7rem",
+              fontWeight: 600, cursor: "pointer",
+            }}
+          >
+            Disconnect
+          </button>
         </>
       ) : (
         <button
