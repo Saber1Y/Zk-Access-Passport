@@ -25,7 +25,12 @@ export interface Credential {
   credential_secret: string
 }
 
-const STORAGE_KEY = "zk_access_credential"
+const CRED_KEY = "zk_access_credential"
+const STATUS_KEY = "zk_access_status"
+const PROOF_KEY = "zk_access_proof"
+const TX_KEY = "zk_access_tx_hash"
+const ERROR_KEY = "zk_access_error"
+const UC_KEY = "zk_access_use_case"
 
 const defaults: Credential = {
   name: "Alice",
@@ -76,14 +81,41 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [lastTxHash, setLastTxHash] = useState("")
   const [lastError, setLastError] = useState("")
   const [useCase, setUseCase] = useState(0)
+
   useEffect(() => {
     if (typeof window === "undefined") return
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      try { setCredential(JSON.parse(saved)); return } catch {}
+
+    const cred = localStorage.getItem(CRED_KEY)
+    if (cred) {
+      try { setCredential(JSON.parse(cred)) } catch {}
+    } else {
+      localStorage.setItem(CRED_KEY, JSON.stringify(defaults))
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults))
+
+    const s = localStorage.getItem(STATUS_KEY)
+    if (s) setStatus(s as Status)
+
+    const p = localStorage.getItem(PROOF_KEY)
+    if (p) { try { setProof(JSON.parse(p)) } catch {} }
+
+    const tx = localStorage.getItem(TX_KEY)
+    if (tx) setLastTxHash(tx)
+
+    const e = localStorage.getItem(ERROR_KEY)
+    if (e) setLastError(e)
+
+    const u = localStorage.getItem(UC_KEY)
+    if (u) setUseCase(Number(u))
   }, [])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    localStorage.setItem(STATUS_KEY, status)
+    localStorage.setItem(PROOF_KEY, proof ? JSON.stringify(proof) : "")
+    localStorage.setItem(TX_KEY, lastTxHash)
+    localStorage.setItem(ERROR_KEY, lastError)
+    localStorage.setItem(UC_KEY, String(useCase))
+  }, [status, proof, lastTxHash, lastError, useCase])
 
   const loadPreset = useCallback((name: string) => {
     const p = PRESETS[name]
@@ -91,7 +123,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const saveCredential = useCallback(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(credential))
+    localStorage.setItem(CRED_KEY, JSON.stringify(credential))
     setStatus("credential_created")
   }, [credential])
 
