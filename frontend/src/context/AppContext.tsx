@@ -45,10 +45,10 @@ const defaults: Credential = {
 }
 
 export const PRESETS: Record<string, Credential> = {
-  eligible_alice: { name: "Alice", age: 24, country: "Kenya", kyc_level: 2, monthly_limit: 1000, already_sent: 300, max_investment: 500, restricted: false, credential_secret: "12345" },
-  underage: { name: "Charlie", age: 16, country: "Kenya", kyc_level: 1, monthly_limit: 500, already_sent: 0, max_investment: 100, restricted: false, credential_secret: "67890" },
-  restricted_investor: { name: "Diana", age: 30, country: "Iran", kyc_level: 3, monthly_limit: 5000, already_sent: 0, max_investment: 10000, restricted: true, credential_secret: "11111" },
-  over_limit: { name: "Eve", age: 28, country: "Kenya", kyc_level: 2, monthly_limit: 1000, already_sent: 800, max_investment: 500, restricted: false, credential_secret: "22222" },
+  eligible_alice: { name: "Alice", age: 24, country: "Kenya", kyc_level: 2, monthly_limit: 1000, already_sent: 300, max_investment: 500, restricted: false, credential_secret: "998877" },
+  underage: { name: "Charlie", age: 16, country: "Kenya", kyc_level: 1, monthly_limit: 500, already_sent: 0, max_investment: 100, restricted: false, credential_secret: "887766" },
+  restricted_investor: { name: "Diana", age: 30, country: "Iran", kyc_level: 3, monthly_limit: 5000, already_sent: 0, max_investment: 10000, restricted: true, credential_secret: "776655" },
+  over_limit: { name: "Eve", age: 28, country: "Kenya", kyc_level: 2, monthly_limit: 1000, already_sent: 800, max_investment: 500, restricted: false, credential_secret: "665544" },
 }
 
 interface AppState {
