@@ -247,13 +247,7 @@ export default function IssuePassport() {
             </div>
           ) : (
             <>
-              <div
-                className="card"
-                style={{
-                  border: "1px solid #059669",
-                  borderLeft: "4px solid #059669",
-                }}
-              >
+              <div className="card">
                 <h3
                   style={{
                     fontSize: "0.95rem",
@@ -303,13 +297,7 @@ export default function IssuePassport() {
                 </div>
               </div>
 
-              <div
-                className="card"
-                style={{
-                  border: "1px solid #f59e0b",
-                  borderLeft: "4px solid #f59e0b",
-                }}
-              >
+              <div className="card">
                 <h4
                   style={{
                     fontSize: "0.85rem",
@@ -347,13 +335,7 @@ export default function IssuePassport() {
                 </table>
               </div>
 
-              <div
-                className="card"
-                style={{
-                  border: "1px solid #6366f1",
-                  borderLeft: "4px solid #6366f1",
-                }}
-              >
+              <div className="card">
                 <h4
                   style={{
                     fontSize: "0.85rem",
@@ -399,7 +381,8 @@ export default function IssuePassport() {
                   }}
                 >
                   Only the proof verification and nullifier go on-chain.
-                  Identity details and credentials remain private and local to the demo app.
+                  Identity details and credentials remain private and local to
+                  the app.
                 </p>
               </div>
 
