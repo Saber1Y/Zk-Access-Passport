@@ -12,6 +12,7 @@ export interface FreighterState {
   connected: boolean
   connecting: boolean
   connect: () => Promise<void>
+  disconnect: () => void
   error: string | null
 }
 
@@ -70,6 +71,15 @@ export function useFreighter(): FreighterState {
     setConnecting(false)
   }, [])
 
+  const disconnect = useCallback(() => {
+    setAddress("")
+    setConnected(false)
+    setNetwork("")
+    setNetworkPassphrase("")
+    setSorobanRpcUrl("")
+    setError(null)
+  }, [])
+
   return {
     address,
     displayName: address ? displayName(address) : "",
@@ -79,6 +89,7 @@ export function useFreighter(): FreighterState {
     connected,
     connecting,
     connect,
+    disconnect,
     error,
   }
 }
