@@ -3,7 +3,7 @@ import { spawnSync } from 'child_process'
 import { readFileSync } from 'fs'
 
 const BACKEND = 'http://localhost:3001/api/prove'
-const CONTRACT = 'CDPKGJVTHBWA6DXNIRFUKUIG5XPNNM3KUTYSQF6DYEEYLZDTORJS2DB2'
+const CONTRACT = 'CCKL3ERP3P3J33Q6YD5J2ZEEIZ7GOHDEJ2W2QQJJ2LQSYYBBW7NJRNOX'
 
 function arrToHex(arr) {
   return Buffer.from(arr).toString('hex')
