@@ -1,13 +1,18 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useApp } from "@/context/AppContext"
 import { generateProof, bytesToHex } from "@/lib/prove"
+import { submitProof } from "@/lib/submit"
+import { useFreighter } from "@/hooks/useFreighter"
 import { HiOutlineSun, HiOutlineArrowLeft } from "react-icons/hi2"
 import Stepper from "./Stepper"
 
 export default function RWAInvestment() {
-  const { credential, status, setStatus, proof, setProof, setLastTxHash, setLastError, lastTxHash, lastError } = useApp()
+  const { credential, status, setStatus, proof, setProof, setLastTxHash, setLastError, lastTxHash, lastError, setUseCase } = useApp()
+  const freighter = useFreighter()
+
+  useEffect(() => { setUseCase(1) }, [setUseCase])
 
   const [investmentAmount, setInvestmentAmount] = useState(100)
   const [asset, setAsset] = useState("SOLAR_BOND_001")
@@ -59,13 +64,27 @@ export default function RWAInvestment() {
   }
 
   async function handleSubmit() {
-    setLastTxHash("0x" + "cd" + Array(62).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join(""))
-    if (investmentAmount > credential.max_investment) {
-      setLastError(`Investment amount exceeds Alice's private investor limit.\nMax allowed: hidden\nSubmitted amount: $${investmentAmount}`)
-    } else {
+    setLoading(true)
+    setLastError("")
+    try {
+      if (!freighter.connected) throw new Error("Connect Freighter wallet first")
+      if (!proof) throw new Error("No proof to submit")
+
+      const result = await submitProof({
+        useCase: 1,
+        piA: proof.pi_a,
+        piB: proof.pi_b,
+        piC: proof.pi_c,
+        publicInputs: proof.publicInputs,
+        publicKey: freighter.address,
+      })
+
+      setLastTxHash(result.hash)
       setStatus("verified")
-      setLastError("")
+    } catch (e: unknown) {
+      setLastError(e instanceof Error ? e.message : String(e))
     }
+    setLoading(false)
   }
 
   function handleOverInvest() {
@@ -150,8 +169,8 @@ export default function RWAInvestment() {
                   {loading ? "Generating Proof..." : "Generate Investor Proof"}
                 </button>
                 {proof && (
-                  <button onClick={handleSubmit} style={{ flex: 1, background: "#059669" }}>
-                    Invest / Mint RWA Token
+                  <button onClick={handleSubmit} disabled={loading} style={{ flex: 1, background: "#059669" }}>
+                    {loading ? "Submitting..." : "Invest / Mint RWA Token"}
                   </button>
                 )}
               </div>
