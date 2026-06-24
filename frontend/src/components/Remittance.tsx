@@ -1,19 +1,23 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useApp } from "@/context/AppContext"
 import { generateProof, bytesToHex } from "@/lib/prove"
+import { submitProof } from "@/lib/submit"
+import { useFreighter } from "@/hooks/useFreighter"
 import Stepper from "./Stepper"
-import type { ProofData } from "@/context/AppContext"
 
 export default function Remittance() {
-  const { credential, status, setStatus, proof, setProof, setLastTxHash, setLastError, lastTxHash, lastError } = useApp()
+  const { credential, status, setStatus, proof, setProof, setLastTxHash, setLastError, lastTxHash, lastError, setUseCase } = useApp()
+  const freighter = useFreighter()
 
   const [recipient, setRecipient] = useState("Bob")
   const [recipientCountry, setRecipientCountry] = useState("Ghana")
   const [amount, setAmount] = useState(150)
   const [loading, setLoading] = useState(false)
   const [overLimitDemo, setOverLimitDemo] = useState(false)
+
+  useEffect(() => { setUseCase(0) }, [setUseCase])
 
   const hasCred = status !== "idle"
 
@@ -51,13 +55,27 @@ export default function Remittance() {
   }
 
   async function handleSubmit() {
-    setLastTxHash("0x" + "ab" + Array(62).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join(""))
-    if (overLimitDemo && amount === 900) {
-      setLastError("$300 + $900 exceeds the $1,000 monthly limit.")
-    } else {
+    setLoading(true)
+    setLastError("")
+    try {
+      if (!freighter.connected) throw new Error("Connect Freighter wallet first")
+      if (!proof) throw new Error("No proof to submit")
+
+      const result = await submitProof({
+        useCase: 0,
+        piA: proof.pi_a,
+        piB: proof.pi_b,
+        piC: proof.pi_c,
+        publicInputs: proof.publicInputs,
+        publicKey: freighter.address,
+      })
+
+      setLastTxHash(result.hash)
       setStatus("verified")
-      setLastError("")
+    } catch (e: unknown) {
+      setLastError(e instanceof Error ? e.message : String(e))
     }
+    setLoading(false)
   }
 
   function handleOverLimit() {
@@ -120,8 +138,8 @@ export default function Remittance() {
                 {loading ? "Generating Proof..." : "Generate Remittance Proof"}
               </button>
               {proof && (
-                <button onClick={handleSubmit} style={{ flex: 1, background: "#059669" }}>
-                  Submit Payment to Stellar
+                <button onClick={handleSubmit} disabled={loading} style={{ flex: 1, background: "#059669" }}>
+                  {loading ? "Submitting..." : "Submit Payment to Stellar"}
                 </button>
               )}
             </div>
