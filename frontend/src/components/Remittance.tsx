@@ -4,11 +4,12 @@ import { useState, useEffect } from "react"
 import { useApp } from "@/context/AppContext"
 import { generateProof, bytesToHex } from "@/lib/prove"
 import { submitProof } from "@/lib/submit"
+import { CONTRACT_ID } from "@/lib/constants"
 import { useFreighter } from "@/hooks/useFreighter"
 import Stepper from "./Stepper"
 
 export default function Remittance() {
-  const { credential, status, setStatus, proof, setProof, setLastTxHash, setLastError, lastTxHash, lastError, setUseCase } = useApp()
+  const { credential, status, setStatus, proof, setProof, setLastTxHash, setLastError, lastTxHash, lastError, setUseCase, setSubmittedAt } = useApp()
   const freighter = useFreighter()
 
   const [recipient, setRecipient] = useState("Bob")
@@ -26,7 +27,7 @@ export default function Remittance() {
     { label: "Enter Payment", done: proof !== null, active: !proof && hasCred },
     { label: "Generate Proof", done: proof !== null && lastTxHash === "", active: proof !== null && lastTxHash === "" },
     { label: "Submit to Stellar", done: lastTxHash !== "", active: lastTxHash === "" && proof !== null },
-    { label: "Payment Released", done: lastTxHash !== "" && !lastError, active: false },
+    { label: "Verification Receipt", done: lastTxHash !== "" && !lastError, active: false },
   ]
 
   async function handleProve() {
@@ -71,6 +72,7 @@ export default function Remittance() {
       })
 
       setLastTxHash(result.hash)
+      setSubmittedAt(Date.now())
       setStatus("verified")
     } catch (e: unknown) {
       setLastError(e instanceof Error ? e.message : String(e))
@@ -172,7 +174,7 @@ export default function Remittance() {
               <p style={{ fontSize: "0.85rem", color: "#555", marginBottom: "0.5rem" }}>Reason:</p>
               <p style={{ fontSize: "0.85rem", background: "#fef2f2", padding: "0.75rem", borderRadius: 6, fontFamily: "monospace" }}>{lastError}</p>
               <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.5rem", fontStyle: "italic" }}>
-                The smart contract did not release payment because the proof failed verification.
+                The smart contract rejected the proof. No transaction was submitted.
               </p>
             </div>
           )}
@@ -181,17 +183,20 @@ export default function Remittance() {
             <div className="card" style={{ border: "1px solid #6366f1", borderLeft: "4px solid #6366f1" }}>
               <h3 style={{ color: "#6366f1", fontSize: "0.95rem", marginBottom: "0.75rem" }}>Remittance Proof Generated</h3>
               <div style={{ fontSize: "0.82rem", marginBottom: "0.75rem" }}>
-                <p style={{ fontWeight: 600, marginBottom: "0.4rem", color: "#059669" }}>Privately proved:</p>
-                <ul style={{ paddingLeft: "1.25rem", color: "#555", lineHeight: 1.6 }}>
-                  <li>✓ User is over 18</li>
-                  <li>✓ User passed KYC level 2</li>
-                  <li>✓ Sender country is allowed</li>
-                  <li>✓ Recipient country is allowed</li>
-                  <li>✓ ${credential.already_sent} + ${amount} is within ${credential.monthly_limit} monthly limit</li>
-                  <li>✓ Nullifier is fresh</li>
-                </ul>
-              </div>
-              <h4 style={{ fontSize: "0.8rem", color: "#6366f1", marginBottom: "0.4rem" }}>Public inputs — sent to Stellar</h4>
+                  <p style={{ fontWeight: 600, marginBottom: "0.4rem", color: "#059669" }}>Verified by circuit:</p>
+                  <ul style={{ paddingLeft: "1.25rem", color: "#555", lineHeight: 1.6 }}>
+                    <li>✓ Age threshold (≥ 18)</li>
+                    <li>✓ KYC level (≥ 2)</li>
+                    <li>✓ ${credential.already_sent} + ${amount} ≤ ${credential.monthly_limit}</li>
+                    <li>✓ Fresh nullifier (replay protected)</li>
+                  </ul>
+                  <p style={{ fontWeight: 600, margin: "0.75rem 0 0.25rem 0", color: "#d97706" }}>Demo policy context:</p>
+                  <ul style={{ paddingLeft: "1.25rem", color: "#888", lineHeight: 1.6 }}>
+                    <li>○ Kenya → Ghana corridor</li>
+                    <li>○ Demo KYC provider issuer</li>
+                  </ul>
+                </div>
+              <h4 style={{ fontSize: "0.8rem", color: "#6366f1", marginBottom: "0.4rem" }}>Demo Public Inputs</h4>
               <table style={{ width: "100%", fontSize: "0.75rem", fontFamily: "monospace" }}>
                 <tbody>
                   <tr><td style={{ color: "#888", padding: "0.15rem 0" }}>Policy ID</td><td style={{ textAlign: "right" }}>REMIT_KENYA_GHANA_V1</td></tr>
@@ -200,25 +205,81 @@ export default function Remittance() {
                   ))}
                 </tbody>
               </table>
+              <p style={{ fontSize: "0.72rem", color: "#999", marginTop: "0.5rem", fontStyle: "italic" }}>
+                Only the proof verification transaction and nullifier are submitted on-chain in this MVP.
+              </p>
             </div>
           )}
 
-          {lastTxHash && !lastError && (
-            <div className="card" style={{ border: "1px solid #059669", borderLeft: "4px solid #059669" }}>
-              <h3 style={{ color: "#059669", fontSize: "0.95rem", marginBottom: "0.75rem" }}>Stellar Contract Result</h3>
-              <div style={{ fontSize: "0.82rem", background: "#f0fdf4", borderRadius: 6, padding: "0.75rem", marginBottom: "0.75rem" }}>
-                <p>✓ Proof verified</p>
-                <p>✓ Nullifier marked as used</p>
-                <p>✓ Payment released to {recipient}</p>
+          {lastTxHash && !lastError && proof && (() => {
+            const nullifier = bytesToHex(proof.publicInputs[proof.publicInputs.length - 1])
+            const receipt = {
+              status: "VERIFIED",
+              network: "stellar-testnet",
+              contract_id: CONTRACT_ID,
+              tx_hash: lastTxHash,
+              wallet: freighter.address,
+              policy_id: "REMIT_KENYA_GHANA_V1",
+              nullifier_hash: nullifier,
+              verified_at: new Date().toISOString(),
+              explorer_url: `https://stellar.expert/explorer/testnet/tx/${lastTxHash}`,
+            }
+            const receiptJson = JSON.stringify(receipt, null, 2)
+            return (
+              <div className="card" style={{ border: "1px solid #059669", borderLeft: "4px solid #059669" }}>
+                <h3 style={{ color: "#059669", fontSize: "0.95rem", marginBottom: "0.75rem" }}>Verification Receipt</h3>
+                <div style={{ fontSize: "0.82rem", background: "#f0fdf4", borderRadius: 6, padding: "0.75rem", marginBottom: "0.75rem" }}>
+                  <p style={{ color: "#059669" }}>✓ Proof verified on Stellar</p>
+                  <p style={{ color: "#059669" }}>✓ Nullifier accepted</p>
+                  <p style={{ color: "#059669" }}>✓ Receipt created</p>
+                  <p style={{ color: "#059669" }}>✓ Ready for external app verification</p>
+                </div>
+
+                <table style={{ width: "100%", fontSize: "0.78rem", marginBottom: "0.75rem" }}>
+                  <tbody>
+                    {[
+                      ["Status", "VERIFIED", "#059669"],
+                      ["Network", "Stellar Testnet"],
+                      ["Contract ID", `${CONTRACT_ID.slice(0, 8)}...${CONTRACT_ID.slice(-4)}`, "mono"],
+                      ["Transaction Hash", `${lastTxHash.slice(0, 8)}...${lastTxHash.slice(-4)}`, "mono"],
+                      ["Wallet", `${freighter.address.slice(0, 6)}...${freighter.address.slice(-4)}`, "mono"],
+                      ["Policy", "REMIT_KENYA_GHANA_V1"],
+                      ["Nullifier", `${nullifier.slice(0, 10)}...`, "mono"],
+                    ].map(([label, val, cls]) => (
+                      <tr key={label}>
+                        <td style={{ color: "#888", padding: "0.25rem 0.5rem 0.25rem 0", whiteSpace: "nowrap" }}>{label}</td>
+                        <td style={{ padding: "0.25rem 0", fontFamily: cls === "mono" ? "monospace" : undefined, fontWeight: cls === "#059669" ? 600 : undefined, color: cls?.startsWith("#") ? cls : undefined }}>{val}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <pre style={{ fontSize: "0.72rem", background: "#1e1e2e", color: "#cdd6f4", padding: "0.75rem", borderRadius: 6, overflow: "auto", maxHeight: 200, marginBottom: "0.75rem" }}>{receiptJson}</pre>
+
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                  <button onClick={() => navigator.clipboard.writeText(receiptJson)} style={copyBtnStyle}>Copy Receipt JSON</button>
+                  <button onClick={() => navigator.clipboard.writeText(lastTxHash)} style={copyBtnStyle}>Copy Tx Hash</button>
+                  <a href={receipt.explorer_url} target="_blank" rel="noopener noreferrer" style={{ ...copyBtnStyle, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    Open Explorer ↗
+                  </a>
+                </div>
               </div>
-              <div style={{ fontSize: "0.75rem" }}>
-                <span style={{ color: "#888" }}>Transaction Hash:</span>
-                <code style={{ display: "block", marginTop: "0.25rem", background: "#1e1e2e", color: "#cdd6f4", padding: "0.4rem", borderRadius: 4, fontSize: "0.7rem" }}>{lastTxHash}</code>
-              </div>
-            </div>
-          )}
+            )
+          })()}
         </div>
       </div>
     </div>
   )
+}
+
+const copyBtnStyle: React.CSSProperties = {
+  background: "#1a1a2e",
+  color: "#fff",
+  border: "none",
+  borderRadius: 6,
+  padding: "0.4rem 0.85rem",
+  fontSize: "0.78rem",
+  fontWeight: 600,
+  cursor: "pointer",
+  transition: "opacity 0.2s",
 }
