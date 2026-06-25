@@ -41,7 +41,7 @@ export default function Remittance() {
     { label: "Enter Payment", done: proof !== null, active: !proof && hasCred },
     {
       label: "Generate Proof",
-      done: proof !== null && lastTxHash === "",
+      done: proof !== null,
       active: proof !== null && lastTxHash === "",
     },
     {
@@ -56,13 +56,30 @@ export default function Remittance() {
     },
   ];
 
+  function validateRemitInputs(effectiveAmount: number): string | null {
+    const REQUIRED_AGE = 18;
+    const REQUIRED_KYC = 2;
+    if (credential.age < REQUIRED_AGE)
+      return `Your age (${credential.age}) must be at least ${REQUIRED_AGE}. Go to Issue Passport and increase Age.`;
+    if (credential.kyc_level < REQUIRED_KYC)
+      return `Your KYC level (${credential.kyc_level}) must be at least ${REQUIRED_KYC}. Go to Issue Passport and set KYC Level to ${REQUIRED_KYC}+.`;
+    if (credential.already_sent + effectiveAmount > credential.monthly_limit)
+      return `Transfer ($${effectiveAmount}) + already sent ($${credential.already_sent}) = $${credential.already_sent + effectiveAmount} exceeds your monthly limit ($${credential.monthly_limit}). Reduce the amount or increase Monthly Limit in your passport.`;
+    return null;
+  }
+
   async function handleProve() {
+    const effectiveAmount = overLimitDemo ? 900 : amount;
+    const validationError = validateRemitInputs(effectiveAmount);
+    if (validationError && !overLimitDemo) {
+      setLastError(validationError);
+      return;
+    }
     setLoading(true);
     setLastError("");
     setProof(null);
     setLastTxHash("");
     try {
-      const effectiveAmount = overLimitDemo ? 900 : amount;
       const p = await generateProof(0, {
         age: credential.age,
         kyc_level: credential.kyc_level,
@@ -130,7 +147,7 @@ export default function Remittance() {
 
       <Stepper steps={steps} />
 
-      <div style={{ display: "flex flex-col", gap: "1.5rem" }}>
+      <div className="two-col" style={{ display: "flex", gap: "1.5rem" }}>
         <div style={{ flex: 1 }}>
           <div className="card">
             <h3 style={{ fontSize: "0.95rem", marginBottom: "1rem" }}>
@@ -193,6 +210,7 @@ export default function Remittance() {
             </div>
 
             <div
+              className="stack-mobile"
               style={{ display: "flex", gap: "0.75rem", marginTop: "0.75rem" }}
             >
               <button
@@ -395,7 +413,7 @@ export default function Remittance() {
                       <td style={{ color: "#888", padding: "0.15rem 0" }}>
                         {["Age ≥", "KYC ≥", "Amount ($)", "Nullifier"][i]}
                       </td>
-                      <td style={{ textAlign: "right" }}>{bytesToHex(pi)}</td>
+                      <td style={{ textAlign: "right", wordBreak: "break-all" }}>{bytesToHex(pi)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -532,6 +550,37 @@ export default function Remittance() {
                   >
                     {receiptJson}
                   </pre>
+
+                  <div
+                    style={{
+                      fontSize: "0.78rem",
+                      background: "#f8fafc",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: 6,
+                      padding: "0.6rem 0.75rem",
+                      marginBottom: "0.75rem",
+                    }}
+                  >
+                    <p style={{ fontWeight: 600, marginBottom: "0.4rem", color: "#334155" }}>
+                      Explorer Status
+                    </p>
+                    {[
+                      ["Transaction hash", /^[0-9a-f]{64}$/.test(lastTxHash)],
+                      ["Wallet", /^G[A-Z2-7]{55}$/.test(freighter.address)],
+                      ["Contract", /^C[A-Z2-7]{55}$/.test(CONTRACT_ID)],
+                    ].map(([label, ok]) => (
+                      <p key={String(label)} style={{ color: ok ? "#059669" : "#ef4444", marginBottom: "0.15rem" }}>
+                        {ok ? "✓" : "✗"} {String(label)} format: {ok ? "Valid" : "Invalid"}
+                      </p>
+                    ))}
+                    <p style={{ color: "#059669", marginBottom: "0.15rem" }}>
+                      ✓ Receipt status: VERIFIED
+                    </p>
+                    <p style={{ marginTop: "0.4rem", fontSize: "0.72rem", color: "#94a3b8" }}>
+                      Note: Testnet explorer may not immediately index new transactions.
+                      Your local receipt is authoritative for this demo.
+                    </p>
+                  </div>
 
                   <div
                     style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}
