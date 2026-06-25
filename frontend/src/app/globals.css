@@ -16,10 +16,12 @@ body {
   padding: 1.25rem;
   margin-bottom: 1rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
-.form-row { display: flex; gap: 1rem; }
-.form-row > * { flex: 1; }
+.form-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+.form-row > * { flex: 1; min-width: 140px; }
 
 label {
   display: block;
@@ -54,6 +56,7 @@ input:disabled, select:disabled {
 
 button {
   font-family: inherit;
+  white-space: normal;
 }
 
 pre {
@@ -71,4 +74,49 @@ code {
   background: #f1f5f9;
   padding: 0.1em 0.3em;
   border-radius: 3px;
+}
+
+.mono-cell {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .card {
+    padding: 0.9rem;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  .form-row > * {
+    min-width: 0;
+  }
+
+  .two-col {
+    flex-direction: column !important;
+  }
+
+  .stack-mobile {
+    flex-direction: column !important;
+  }
+
+  .hero-btns {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .hero-btns > * {
+    width: 100% !important;
+  }
+
+  .mono-cell {
+    max-width: 100px;
+  }
+
+  .hide-mobile {
+    display: none !important;
+  }
 }
