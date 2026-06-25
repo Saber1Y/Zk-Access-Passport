@@ -55,8 +55,9 @@ export async function POST(req: NextRequest) {
     }
 
     function g2Bytes(pt: any) {
-      return [...toBytes(pt[0][0].toString()), ...toBytes(pt[0][1].toString()),
-              ...toBytes(pt[1][0].toString()), ...toBytes(pt[1][1].toString())]
+      const xr = pt[0][0].toString(), xi = pt[0][1].toString()
+      const yr = pt[1][0].toString(), yi = pt[1][1].toString()
+      return [...toBytes(xi), ...toBytes(xr), ...toBytes(yi), ...toBytes(yr)]
     }
 
     return NextResponse.json({
