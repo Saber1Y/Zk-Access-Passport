@@ -45,7 +45,7 @@ export default function RWAInvestment() {
     },
     {
       label: "Generate Proof",
-      done: proof !== null && lastTxHash === "",
+      done: proof !== null,
       active: proof !== null && lastTxHash === "",
     },
     {
@@ -74,7 +74,26 @@ export default function RWAInvestment() {
     ],
   };
 
+  function validateRWAInputs(): string | null {
+    const REQUIRED_AGE = 18;
+    const REQUIRED_KYC = 2;
+    if (credential.age < REQUIRED_AGE)
+      return `Your age (${credential.age}) must be at least ${REQUIRED_AGE}. Go to Issue Passport and increase Age.`;
+    if (credential.kyc_level < REQUIRED_KYC)
+      return `Your KYC level (${credential.kyc_level}) must be at least ${REQUIRED_KYC}. Go to Issue Passport and set KYC Level to ${REQUIRED_KYC}+.`;
+    if (investmentAmount > credential.max_investment)
+      return `Investment ($${investmentAmount}) exceeds your max ($${credential.max_investment}). Lower the amount or increase Max RWA Investment in your passport.`;
+    if (credential.restricted)
+      return `Your passport is marked as a Restricted Investor. Go to Issue Passport and set Restricted to No.`;
+    return null;
+  }
+
   async function handleProve() {
+    const validationError = validateRWAInputs();
+    if (validationError) {
+      setLastError(validationError);
+      return;
+    }
     setLoading(true);
     setLastError("");
     setProof(null);
@@ -126,13 +145,13 @@ export default function RWAInvestment() {
     setLoading(false);
   }
 
-  function handleOverInvest() {
-    setInvestmentAmount(800);
-    setProof(null);
-    setLastTxHash("");
-    setLastError("");
-    setStatus("credential_created");
-  }
+  // function handleOverInvest() {
+  //   setInvestmentAmount(800);
+  //   setProof(null);
+  //   setLastTxHash("");
+  //   setLastError("");
+  //   setStatus("credential_created");
+  // }
 
   return (
     <div>
@@ -230,7 +249,7 @@ export default function RWAInvestment() {
           </div>
         </div>
       ) : (
-        <div style={{ display: "flex flex-col", gap: "1.5rem" }}>
+        <div className="two-col" style={{ display: "flex", gap: "1.5rem" }}>
           <div style={{ flex: 1 }}>
             <button
               onClick={() => setViewingAsset(false)}
@@ -281,6 +300,7 @@ export default function RWAInvestment() {
               </div>
 
               <div
+                className="stack-mobile"
                 style={{
                   display: "flex",
                   gap: "0.75rem",
@@ -296,8 +316,8 @@ export default function RWAInvestment() {
                     color: "#fff",
                     border: "none",
                     borderRadius: 8,
-                    padding: "0.50rem 2rem",
-                    fontSize: "0.95rem",
+                    padding: "0.50rem 1rem",
+                    fontSize: "0.85rem",
                     fontWeight: 600,
                     cursor: "pointer",
                     transition: "opacity 0.2s",
@@ -316,8 +336,8 @@ export default function RWAInvestment() {
                       border: "none",
                       color: "#fff",
                       borderRadius: 8,
-                      padding: "0.50rem 2rem",
-                      fontSize: "0.95rem",
+                      padding: "0.50rem 1rem",
+                      fontSize: "0.85rem",
                       fontWeight: 600,
                       cursor: "pointer",
                       transition: "opacity 0.2s",
@@ -329,7 +349,7 @@ export default function RWAInvestment() {
                 )}
               </div>
 
-              <div
+              {/* <div
                 style={{
                   marginTop: "0.75rem",
                   paddingTop: "0.75rem",
@@ -352,7 +372,7 @@ export default function RWAInvestment() {
                 >
                   Try $800 Investment (over limit)
                 </button>
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -407,7 +427,8 @@ export default function RWAInvestment() {
                     fontStyle: "italic",
                   }}
                 >
-                  The smart contract rejected the proof. No transaction was submitted.
+                  The smart contract rejected the proof. No transaction was
+                  submitted.
                 </p>
               </div>
             )}
@@ -431,58 +452,59 @@ export default function RWAInvestment() {
                 </h3>
                 <div style={{ fontSize: "0.82rem", marginBottom: "0.75rem" }}>
                   <p
-                      style={{
-                        fontWeight: 600,
-                        marginBottom: "0.4rem",
-                        color: "#059669",
-                      }}
-                    >
-                      Verified by circuit:
-                    </p>
-                    <ul
-                      style={{
-                        paddingLeft: "1.25rem",
-                        color: "#555",
-                        lineHeight: 1.6,
-                      }}
-                    >
-                      <li>✓ Age threshold (≥ 18)</li>
-                      <li>✓ KYC level (≥ 2)</li>
-                      <li>✓ Not a restricted investor</li>
-                      <li>
-                        ✓ ${investmentAmount} ≤ ${credential.max_investment} investor limit
-                      </li>
-                      <li>✓ Fresh nullifier (replay protected)</li>
-                    </ul>
-                    <p
-                      style={{
-                        fontWeight: 600,
-                        margin: "0.75rem 0 0.25rem 0",
-                        color: "#d97706",
-                      }}
-                    >
-                      Demo policy context:
-                    </p>
-                    <ul
-                      style={{
-                        paddingLeft: "1.25rem",
-                        color: "#888",
-                        lineHeight: 1.6,
-                      }}
-                    >
-                      <li>○ RWA Solar Bond policy</li>
-                      <li>○ Demo KYC provider issuer</li>
-                    </ul>
-                </div>
-                <h4
                     style={{
-                      fontSize: "0.8rem",
-                      color: "#6366f1",
+                      fontWeight: 600,
                       marginBottom: "0.4rem",
+                      color: "#059669",
                     }}
                   >
-                    Demo Public Inputs
-                  </h4>
+                    Verified by circuit:
+                  </p>
+                  <ul
+                    style={{
+                      paddingLeft: "1.25rem",
+                      color: "#555",
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    <li>✓ Age threshold (≥ 18)</li>
+                    <li>✓ KYC level (≥ 2)</li>
+                    <li>✓ Not a restricted investor</li>
+                    <li>
+                      ✓ ${investmentAmount} ≤ ${credential.max_investment}{" "}
+                      investor limit
+                    </li>
+                    <li>✓ Fresh nullifier (replay protected)</li>
+                  </ul>
+                  <p
+                    style={{
+                      fontWeight: 600,
+                      margin: "0.75rem 0 0.25rem 0",
+                      color: "#d97706",
+                    }}
+                  >
+                    Demo policy context:
+                  </p>
+                  <ul
+                    style={{
+                      paddingLeft: "1.25rem",
+                      color: "#888",
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    <li>○ RWA Solar Bond policy</li>
+                    <li>○ Demo KYC provider issuer</li>
+                  </ul>
+                </div>
+                <h4
+                  style={{
+                    fontSize: "0.8rem",
+                    color: "#6366f1",
+                    marginBottom: "0.4rem",
+                  }}
+                >
+                  Demo Public Inputs
+                </h4>
                 <table
                   style={{
                     width: "100%",
@@ -516,7 +538,7 @@ export default function RWAInvestment() {
                             ][i]
                           }
                         </td>
-                        <td style={{ textAlign: "right" }}>{bytesToHex(pi)}</td>
+                        <td style={{ textAlign: "right", wordBreak: "break-all" }}>{bytesToHex(pi)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -529,66 +551,229 @@ export default function RWAInvestment() {
                     fontStyle: "italic",
                   }}
                 >
-                  Only the proof verification transaction and nullifier are submitted on-chain in this MVP.
+                  Only the proof verification transaction and nullifier are
+                  submitted on-chain in this MVP.
                 </p>
               </div>
             )}
 
-            {lastTxHash && !lastError && proof && (() => {
-              const nullifier = bytesToHex(proof.publicInputs[proof.publicInputs.length - 1])
-              const receipt = {
-                status: "VERIFIED",
-                network: "stellar-testnet",
-                contract_id: CONTRACT_ID,
-                tx_hash: lastTxHash,
-                wallet: freighter.address,
-                policy_id: "RWA_SOLAR_BOND_V1",
-                nullifier_hash: nullifier,
-                verified_at: new Date().toISOString(),
-                explorer_url: `https://stellar.expert/explorer/testnet/tx/${lastTxHash}`,
-              }
-              const receiptJson = JSON.stringify(receipt, null, 2)
-              return (
-                <div className="card" style={{ border: "1px solid #059669", borderLeft: "4px solid #059669" }}>
-                  <h3 style={{ color: "#059669", fontSize: "0.95rem", marginBottom: "0.75rem" }}>Investor Verification Receipt</h3>
-                  <div style={{ fontSize: "0.82rem", background: "#f0fdf4", borderRadius: 6, padding: "0.75rem", marginBottom: "0.75rem" }}>
-                    <p style={{ color: "#059669" }}>✓ Eligibility proof verified on Stellar</p>
-                    <p style={{ color: "#059669" }}>✓ Nullifier accepted</p>
-                    <p style={{ color: "#059669" }}>✓ Receipt created</p>
-                    <p style={{ color: "#059669" }}>✓ Ready for external RWA platform</p>
-                  </div>
+            {lastTxHash &&
+              !lastError &&
+              proof &&
+              (() => {
+                const nullifier = bytesToHex(
+                  proof.publicInputs[proof.publicInputs.length - 1],
+                );
+                const receipt = {
+                  status: "VERIFIED",
+                  network: "stellar-testnet",
+                  contract_id: CONTRACT_ID,
+                  tx_hash: lastTxHash,
+                  wallet: freighter.address,
+                  policy_id: "RWA_SOLAR_BOND_V1",
+                  nullifier_hash: nullifier,
+                  verified_at: new Date().toISOString(),
+                  explorer_url: `https://stellar.expert/explorer/testnet/tx/${lastTxHash}`,
+                };
+                const receiptJson = JSON.stringify(receipt, null, 2);
+                return (
+                  <div
+                    className="card"
+                    style={{
+                      border: "1px solid #059669",
+                      borderLeft: "4px solid #059669",
+                    }}
+                  >
+                    <h3
+                      style={{
+                        color: "#059669",
+                        fontSize: "0.95rem",
+                        marginBottom: "0.75rem",
+                      }}
+                    >
+                      Investor Verification Receipt
+                    </h3>
+                    <div
+                      style={{
+                        fontSize: "0.82rem",
+                        background: "#f0fdf4",
+                        borderRadius: 6,
+                        padding: "0.75rem",
+                        marginBottom: "0.75rem",
+                      }}
+                    >
+                      <p style={{ color: "#059669" }}>
+                        ✓ Eligibility proof verified on Stellar
+                      </p>
+                      <p style={{ color: "#059669" }}>✓ Nullifier accepted</p>
+                      <p style={{ color: "#059669" }}>✓ Receipt created</p>
+                      <p style={{ color: "#059669" }}>
+                        ✓ Ready for external RWA platform
+                      </p>
+                    </div>
 
-                  <table style={{ width: "100%", fontSize: "0.78rem", marginBottom: "0.75rem" }}>
-                    <tbody>
+                    <table
+                      style={{
+                        width: "100%",
+                        fontSize: "0.78rem",
+                        marginBottom: "0.75rem",
+                      }}
+                    >
+                      <tbody>
+                        {[
+                          ["Status", "VERIFIED", "#059669"],
+                          ["Network", "Stellar Testnet"],
+                          [
+                            "Contract ID",
+                            `${CONTRACT_ID.slice(0, 8)}...${CONTRACT_ID.slice(-4)}`,
+                            "mono",
+                          ],
+                          [
+                            "Transaction Hash",
+                            `${lastTxHash.slice(0, 8)}...${lastTxHash.slice(-4)}`,
+                            "mono",
+                          ],
+                          [
+                            "Wallet",
+                            `${freighter.address.slice(0, 6)}...${freighter.address.slice(-4)}`,
+                            "mono",
+                          ],
+                          ["Policy", "RWA_SOLAR_BOND_V1"],
+                          ["Nullifier", `${nullifier.slice(0, 10)}...`, "mono"],
+                        ].map(([label, val, cls]) => (
+                          <tr key={label}>
+                            <td
+                              style={{
+                                color: "#888",
+                                padding: "0.25rem 0.5rem 0.25rem 0",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {label}
+                            </td>
+                            <td
+                              style={{
+                                padding: "0.25rem 0",
+                                fontFamily:
+                                  cls === "mono" ? "monospace" : undefined,
+                                fontWeight: cls === "#059669" ? 600 : undefined,
+                                color: cls?.startsWith("#") ? cls : undefined,
+                              }}
+                            >
+                              {val}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    <pre
+                      style={{
+                        fontSize: "0.72rem",
+                        background: "#1e1e2e",
+                        color: "#cdd6f4",
+                        padding: "0.75rem",
+                        borderRadius: 6,
+                        overflow: "auto",
+                        maxHeight: 200,
+                        marginBottom: "0.75rem",
+                      }}
+                    >
+                      {receiptJson}
+                    </pre>
+
+                    <div
+                      style={{
+                        fontSize: "0.78rem",
+                        background: "#f8fafc",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: 6,
+                        padding: "0.6rem 0.75rem",
+                        marginBottom: "0.75rem",
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontWeight: 600,
+                          marginBottom: "0.4rem",
+                          color: "#334155",
+                        }}
+                      >
+                        Explorer Status
+                      </p>
                       {[
-                        ["Status", "VERIFIED", "#059669"],
-                        ["Network", "Stellar Testnet"],
-                        ["Contract ID", `${CONTRACT_ID.slice(0, 8)}...${CONTRACT_ID.slice(-4)}`, "mono"],
-                        ["Transaction Hash", `${lastTxHash.slice(0, 8)}...${lastTxHash.slice(-4)}`, "mono"],
-                        ["Wallet", `${freighter.address.slice(0, 6)}...${freighter.address.slice(-4)}`, "mono"],
-                        ["Policy", "RWA_SOLAR_BOND_V1"],
-                        ["Nullifier", `${nullifier.slice(0, 10)}...`, "mono"],
-                      ].map(([label, val, cls]) => (
-                        <tr key={label}>
-                          <td style={{ color: "#888", padding: "0.25rem 0.5rem 0.25rem 0", whiteSpace: "nowrap" }}>{label}</td>
-                          <td style={{ padding: "0.25rem 0", fontFamily: cls === "mono" ? "monospace" : undefined, fontWeight: cls === "#059669" ? 600 : undefined, color: cls?.startsWith("#") ? cls : undefined }}>{val}</td>
-                        </tr>
+                        ["Transaction hash", /^[0-9a-f]{64}$/.test(lastTxHash)],
+                        ["Wallet", /^G[A-Z2-7]{55}$/.test(freighter.address)],
+                        ["Contract", /^C[A-Z2-7]{55}$/.test(CONTRACT_ID)],
+                      ].map(([label, ok]) => (
+                        <p
+                          key={String(label)}
+                          style={{
+                            color: ok ? "#059669" : "#ef4444",
+                            marginBottom: "0.15rem",
+                          }}
+                        >
+                          {ok ? "✓" : "✗"} {String(label)} format:{" "}
+                          {ok ? "Valid" : "Invalid"}
+                        </p>
                       ))}
-                    </tbody>
-                  </table>
+                      <p style={{ color: "#059669", marginBottom: "0.15rem" }}>
+                        ✓ Receipt status: VERIFIED
+                      </p>
+                      <p
+                        style={{
+                          marginTop: "0.4rem",
+                          fontSize: "0.72rem",
+                          color: "#94a3b8",
+                        }}
+                      >
+                        Note: Testnet explorer may not immediately index new
+                        transactions. Your local receipt is authoritative for
+                        this demo.
+                      </p>
+                    </div>
 
-                  <pre style={{ fontSize: "0.72rem", background: "#1e1e2e", color: "#cdd6f4", padding: "0.75rem", borderRadius: 6, overflow: "auto", maxHeight: 200, marginBottom: "0.75rem" }}>{receiptJson}</pre>
-
-                  <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                    <button onClick={() => navigator.clipboard.writeText(receiptJson)} style={copyBtnStyle}>Copy Receipt JSON</button>
-                    <button onClick={() => navigator.clipboard.writeText(lastTxHash)} style={copyBtnStyle}>Copy Tx Hash</button>
-                    <a href={receipt.explorer_url} target="_blank" rel="noopener noreferrer" style={{ ...copyBtnStyle, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}>
-                      Open Explorer ↗
-                    </a>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "0.5rem",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <button
+                        onClick={() =>
+                          navigator.clipboard.writeText(receiptJson)
+                        }
+                        style={copyBtnStyle}
+                      >
+                        Copy Receipt JSON
+                      </button>
+                      <button
+                        onClick={() =>
+                          navigator.clipboard.writeText(lastTxHash)
+                        }
+                        style={copyBtnStyle}
+                      >
+                        Copy Tx Hash
+                      </button>
+                      <a
+                        href={receipt.explorer_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          ...copyBtnStyle,
+                          textDecoration: "none",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
+                        Open Explorer ↗
+                      </a>
+                    </div>
                   </div>
-                </div>
-              )
-            })()}
+                );
+              })()}
           </div>
         </div>
       )}
