@@ -23,7 +23,7 @@ export default function Dashboard() {
         <p style={{ fontSize: "1rem", color: "#94a3b8", marginBottom: "1.5rem", maxWidth: 480, margin: "0 auto 1.5rem" }}>
           Prove financial eligibility for Stellar payments and tokenized assets without revealing private identity data.
         </p>
-        <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center" }}>
+        <div className="hero-btns" style={{ display: "flex", gap: "0.75rem", justifyContent: "center" }}>
           <button
             onClick={() => setTab("issue")}
             style={{
@@ -50,7 +50,7 @@ export default function Dashboard() {
 
       <div className="card">
         <h3 style={{ fontSize: "0.95rem", marginBottom: "0.75rem" }}>How it works</h3>
-        <div style={{ display: "flex", gap: "0.75rem", counterReset: "step" }}>
+        <div className="stack-mobile" style={{ display: "flex", gap: "0.75rem", counterReset: "step" }}>
           {["User receives a private credential", "User generates a zero-knowledge proof", "Soroban contract verifies proof on Stellar", "Payment or investment is approved"].map((step, i) => (
             <div key={i} style={{ flex: 1, background: "#f8fafc", borderRadius: 8, padding: "0.75rem", textAlign: "center", position: "relative" }}>
               <div style={{
@@ -64,7 +64,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "1rem" }}>
+      <div className="stack-mobile" style={{ display: "flex", gap: "1rem" }}>
         {features.map((f) => {
           const Icon = f.icon
           return (
