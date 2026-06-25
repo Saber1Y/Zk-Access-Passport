@@ -124,14 +124,14 @@ export default function Remittance() {
     setLoading(false);
   }
 
-  function handleOverLimit() {
-    setOverLimitDemo(true);
-    setAmount(900);
-    setProof(null);
-    setLastTxHash("");
-    setLastError("");
-    setStatus("credential_created");
-  }
+  // function handleOverLimit() {
+  //   setOverLimitDemo(true);
+  //   setAmount(900);
+  //   setProof(null);
+  //   setLastTxHash("");
+  //   setLastError("");
+  //   setStatus("credential_created");
+  // }
 
   return (
     <div>
@@ -147,7 +147,10 @@ export default function Remittance() {
 
       <Stepper steps={steps} />
 
-      <div className="two-col" style={{ display: "flex", gap: "1.5rem" }}>
+      <div
+        className="two-col"
+        style={{ display: "flex flex-col", gap: "1.5rem" }}
+      >
         <div style={{ flex: 1 }}>
           <div className="card">
             <h3 style={{ fontSize: "0.95rem", marginBottom: "1rem" }}>
@@ -243,7 +246,7 @@ export default function Remittance() {
               )}
             </div>
 
-            <div
+            {/* <div
               style={{
                 marginTop: "0.75rem",
                 paddingTop: "0.75rem",
@@ -266,7 +269,7 @@ export default function Remittance() {
               >
                 Try Over-Limit Transfer ($900)
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -413,7 +416,11 @@ export default function Remittance() {
                       <td style={{ color: "#888", padding: "0.15rem 0" }}>
                         {["Age ≥", "KYC ≥", "Amount ($)", "Nullifier"][i]}
                       </td>
-                      <td style={{ textAlign: "right", wordBreak: "break-all" }}>{bytesToHex(pi)}</td>
+                      <td
+                        style={{ textAlign: "right", wordBreak: "break-all" }}
+                      >
+                        {bytesToHex(pi)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -561,7 +568,13 @@ export default function Remittance() {
                       marginBottom: "0.75rem",
                     }}
                   >
-                    <p style={{ fontWeight: 600, marginBottom: "0.4rem", color: "#334155" }}>
+                    <p
+                      style={{
+                        fontWeight: 600,
+                        marginBottom: "0.4rem",
+                        color: "#334155",
+                      }}
+                    >
                       Explorer Status
                     </p>
                     {[
@@ -569,16 +582,30 @@ export default function Remittance() {
                       ["Wallet", /^G[A-Z2-7]{55}$/.test(freighter.address)],
                       ["Contract", /^C[A-Z2-7]{55}$/.test(CONTRACT_ID)],
                     ].map(([label, ok]) => (
-                      <p key={String(label)} style={{ color: ok ? "#059669" : "#ef4444", marginBottom: "0.15rem" }}>
-                        {ok ? "✓" : "✗"} {String(label)} format: {ok ? "Valid" : "Invalid"}
+                      <p
+                        key={String(label)}
+                        style={{
+                          color: ok ? "#059669" : "#ef4444",
+                          marginBottom: "0.15rem",
+                        }}
+                      >
+                        {ok ? "✓" : "✗"} {String(label)} format:{" "}
+                        {ok ? "Valid" : "Invalid"}
                       </p>
                     ))}
                     <p style={{ color: "#059669", marginBottom: "0.15rem" }}>
                       ✓ Receipt status: VERIFIED
                     </p>
-                    <p style={{ marginTop: "0.4rem", fontSize: "0.72rem", color: "#94a3b8" }}>
-                      Note: Testnet explorer may not immediately index new transactions.
-                      Your local receipt is authoritative for this demo.
+                    <p
+                      style={{
+                        marginTop: "0.4rem",
+                        fontSize: "0.72rem",
+                        color: "#94a3b8",
+                      }}
+                    >
+                      Note: Testnet explorer may not immediately index new
+                      transactions. Your local receipt is authoritative for this
+                      demo.
                     </p>
                   </div>
 

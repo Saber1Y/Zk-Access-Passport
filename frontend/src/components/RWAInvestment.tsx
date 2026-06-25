@@ -249,7 +249,7 @@ export default function RWAInvestment() {
           </div>
         </div>
       ) : (
-        <div className="two-col" style={{ display: "flex", gap: "1.5rem" }}>
+        <div className="two-col" style={{ display: "flex flex-col", gap: "1.5rem" }}>
           <div style={{ flex: 1 }}>
             <button
               onClick={() => setViewingAsset(false)}
