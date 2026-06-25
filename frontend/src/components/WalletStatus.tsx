@@ -13,21 +13,17 @@ export default function WalletStatus() {
     <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", fontSize: "0.8rem" }}>
       {connected ? (
         <>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-            <span style={{
-              width: 8, height: 8, borderRadius: "50%",
-              background: "#22c55e", display: "inline-block",
-            }} />
-            <span title={address}>{displayName}</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-            <span style={{
-              width: 8, height: 8, borderRadius: "50%",
-              background: network === "TESTNET" ? "#22c55e" : "#f59e0b",
-              display: "inline-block",
-            }} />
-            <span>{network || "Unknown"}</span>
-          </div>
+          <span className="hide-mobile" style={{
+            width: 8, height: 8, borderRadius: "50%",
+            background: "#22c55e", display: "inline-block",
+          }} />
+          <span className="hide-mobile" title={address} style={{ maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{displayName}</span>
+          <span className="hide-mobile" style={{
+            width: 8, height: 8, borderRadius: "50%",
+            background: network === "TESTNET" ? "#22c55e" : "#f59e0b",
+            display: "inline-block",
+          }} />
+          <span className="hide-mobile" style={{ fontSize: "0.7rem" }}>{network || "Unknown"}</span>
           <button
             onClick={disconnect}
             style={{
