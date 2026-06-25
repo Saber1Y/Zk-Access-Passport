@@ -2,9 +2,9 @@
 
 Zero-knowledge proof-based compliance system on Stellar Soroban. Prove age, KYC level, remittance limits, and investor eligibility without revealing private data.
 
-Two verifiable use cases:
-- **Remittance** (use_case=0) — Cross-border payment compliance
-- **RWA Investment** (use_case=1) — Tokenized real-world asset eligibility
+Two verified use cases:
+- **Remittance** — Cross-border payment compliance (Kenya → Ghana corridor)
+- **RWA Investment** — Tokenized real-world asset eligibility
 
 ## Architecture
 
@@ -18,26 +18,25 @@ User (Freighter wallet)
 
 - **Circuits**: `circuits/remit_pass.circom` and `circuits/rwa_pass.circom`
 - **Backend**: Express server on `:3001` — generates Groth16 proofs via snarkjs
-- **Contract**: Soroban contract deployed on Stellar testnet — verifies proofs and enforces nullifier replay protection
-- **Frontend**: Next.js app — credential creation, proof generation, and contract submission via Freighter
+- **Contract**: Soroban contract on Stellar testnet — verifies proofs, enforces nullifier replay protection
+- **Frontend**: Next.js app — credential creation, proof generation, contract submission via Freighter
 
 ## Prerequisites
 
 - **Node.js** 20+
 - **Stellar CLI** — `curl -fsSL https://stellar.org/cli/install.sh | sh`
 - **Freighter** browser wallet (Stellar Testnet)
-- **Make** / bash
+- **Make**
 
 ## Setup
 
 ### 1. Circuits
 
 ```bash
-# Build both circuits
 cd circuits
 make setup   # downloads powers of tau (only once)
 make build   # compiles circom → r1cs, wasm, zkey
-make vk      # exports verification key (contract uses this)
+make vk      # exports verification key
 ```
 
 ### 2. Backend
@@ -52,14 +51,14 @@ node server.js   # starts on :3001
 
 ```bash
 cd contracts/zk-access-gate
-make build          # compiles rust → wasm
-make deploy-testnet # deploys to Stellar testnet
+make build
+make deploy-testnet
 ```
 
-The deployed contract address is in `src/lib/constants.ts`:
+The deployed contract address is in `frontend/src/lib/constants.ts`:
 
 ```
-CONTRACT_ID = CCKL3ERP3P3J33Q6YD5J2ZEEIZ7GOHDEJ2W2QQJJ2LQSYYBBW7NJRNOX
+CONTRACT_ID = CBDVEJZHVL63X4IY36NUURN6NBNVUYOLR6CR6HLOYWD5QJBGWIBMPNCM
 ```
 
 ### 4. Frontend
@@ -74,57 +73,52 @@ Open `http://localhost:3000` in your browser.
 
 ## Testing
 
-### Generate and verify proofs (CLI)
+Start both the backend and frontend:
 
 ```bash
-# Both terminals:
+# Terminal 1
 cd backend && node server.js
 
-# Terminal 2:
-node scripts/test_contract.js     # REMIT verification
-node scripts/test_rwa_contract.js  # RWA verification
+# Terminal 2
+cd frontend && npm run dev
 ```
 
-Each `credential_secret` can only be used once (nullifier replay protection). Change the value in the test script to re-test.
+### CLI test
 
-### Frontend demo
+```bash
+node scripts/test_contract.js
+```
+
+This generates a remittance proof and invokes the contract. The credential secret is hardcoded in the test script — each secret can only be used once (nullifier protection).
+
+### Frontend flow
 
 1. Open `http://localhost:3000`
 2. Connect Freighter wallet (Stellar Testnet)
-3. Go to **Issue Passport** — fill in your credential (or use a preset)
-4. **Remittance** — set amount, generate proof, submit to contract
-5. **RWA Investment** — set investment amount, generate proof, submit
-6. **Proof Explorer** — inspect public vs. hidden data
+3. **Issue Passport** — fill in a demo user, click Generate Private Passport
+4. **Remittance** — set amount, generate proof, submit to Stellar
+5. **RWA Investment** — select an asset, generate proof, submit
+6. **Proof Explorer** — inspect public vs hidden data
 
-### Manual contract invocation
-
-```bash
-stellar contract invoke \
-  --id CCKL3ERP3P3J33Q6YD5J2ZEEIZ7GOHDEJ2W2QQJJ2LQSYYBBW7NJRNOX \
-  --source zk_access_gate \
-  --network testnet \
-  -- \
-  verify \
-  --use_case 0 \
-  --pi_a <64-byte-hex> \
-  --pi_b <128-byte-hex> \
-  --pi_c <64-byte-hex> \
-  --public_inputs '["<32-byte-hex>", ...]'
-```
+Each passport generates a fresh credential secret. Once its proof is accepted on-chain, the nullifier is stored and that passport cant be reused. Create a new passport for each submission.
 
 ## How It Works
 
-1. **Credential** — user's private data (age, KYC, limits) stored in browser localStorage
-2. **Proof generation** — backend runs the Circom circuit (witness + Groth16 prover), returns `pi_a/b/c` and public inputs
-3. **Nullifier** — Poseidon hash of `credential_secret`, used to prevent double-spending
-4. **Contract submission** — frontend builds a Soroban transaction via `@stellar/stellar-sdk`, signs with Freighter, submits to testnet
-5. **Verification** — contract performs BN254 pairing check + nullifier exhaustion check; returns the public inputs on success or panics on failure
+1. **Credential** — private data (age, KYC, limits) stays in browser localStorage
+2. **Proof generation** — backend runs the Circom circuit (witness + Groth16 prover)
+3. **Nullifier** — Poseidon hash of credential_secret, prevents double-spending
+4. **Contract submission** — frontend builds a Soroban tx via `@stellar/stellar-sdk`, signs with Freighter, submits to testnet
+5. **Verification** — contract does a BN254 pairing check + nullifier check; passes or panics
 
 ## Contract
 
 | Contract | Address |
 |----------|---------|
-| Production | `CCKL3ERP3P3J33Q6YD5J2ZEEIZ7GOHDEJ2W2QQJJ2LQSYYBBW7NJRNOX` |
-| Debug | N/A (deleted) |
+| Production | `CBDVEJZHVL63X4IY36NUURN6NBNVUYOLR6CR6HLOYWD5QJBGWIBMPNCM` |
+| Network | Stellar Testnet |
 
-Both proofs verified successfully at the above production address.
+## Notes
+
+- Only the proof verification tx and nullifier go on-chain. Identity data stays local.
+- The remittance "over-limit" button is intentionally meant to fail (shows the circuit catching it).
+- Mobile: sidebar collapses to a hamburger menu. Wallet address/network hidden on small screens.
