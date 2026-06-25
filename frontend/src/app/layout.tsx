@@ -10,6 +10,7 @@ const sora = Sora({
 export const metadata: Metadata = {
   title: "ZK Access Passport",
   description: "Private compliance proofs for Stellar payments and tokenized assets",
+  icons: [{ rel: "icon", url: "/logo.png" }],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
