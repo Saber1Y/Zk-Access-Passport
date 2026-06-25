@@ -15,11 +15,14 @@ export default function IssuePassport() {
     setCredential,
     status,
     saveCredential,
+    reset,
     setTab,
   } = useApp();
   const [saved, setSaved] = useState(status === "credential_created");
 
   function handleSave() {
+    setCredential({ ...credential, credential_secret: String(Math.floor(Math.random() * 1_000_000_000)) })
+    reset();
     saveCredential();
     setSaved(true);
   }
@@ -45,7 +48,7 @@ export default function IssuePassport() {
 
       <Stepper steps={steps} />
 
-      <div style={{ display: "flex", gap: "1.5rem" }}>
+      <div className="two-col" style={{ display: "flex", gap: "1.5rem" }}>
         <div style={{ flex: 1 }}>
           <div className="card">
             <h3 style={{ fontSize: "0.95rem", marginBottom: "1rem" }}>
